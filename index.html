@@ -3,89 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>Rebuild the Cover — A Five-Piece Puzzle</title>
+<meta name="color-scheme" content="dark">
+<title>Rebuild the Cover — Five Editions</title>
 <style>
   :root {
-    --bg: #DCD9CF;
-    --plate: #F4F2EC;
-    --plate-edge: #C3BFB2;
-    --ink: #191C22;
-    --ink-soft: #5A5F68;
-    --ink-faint: #8B8F96;
-    --cyan: #0E7C93;
-    --magenta: #B22F62;
-    --rule: #C7C3B6;
-    --shadow: rgba(25, 28, 34, .22);
-    --focus: #0E7C93;
+    --sky-top: #04060d;
+    --sky-horizon: #2b3766;
+    --paper: #f7f1e3;
+    --paper-edge: #e2d3ac;
+    --plate: #efe6cf;
+    --plate-edge: #d8c79c;
+    --ink: #201c16;
+    --ink-soft: #5b5346;
+    --ink-faint: #8d8371;
+    --brass: #c8963f;
+    --brass-deep: #96701f;
+    --indigo: #33437a;
+    --shadow: rgba(10, 8, 4, .38);
+    --focus: #a8721f;
 
     --display: Georgia, "Iowan Old Style", "Times New Roman", serif;
     --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #15181D;
-      --plate: #21252D;
-      --plate-edge: #333944;
-      --ink: #E7E4DA;
-      --ink-soft: #A2A7B0;
-      --ink-faint: #6E747E;
-      --cyan: #3FBCD2;
-      --magenta: #E4699B;
-      --rule: #343A45;
-      --shadow: rgba(0, 0, 0, .55);
-      --focus: #3FBCD2;
-    }
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #15181D;
-    --plate: #21252D;
-    --plate-edge: #333944;
-    --ink: #E7E4DA;
-    --ink-soft: #A2A7B0;
-    --ink-faint: #6E747E;
-    --cyan: #3FBCD2;
-    --magenta: #E4699B;
-    --rule: #343A45;
-    --shadow: rgba(0, 0, 0, .55);
-    --focus: #3FBCD2;
-  }
-
-  :root[data-theme="light"] {
-    --bg: #DCD9CF;
-    --plate: #F4F2EC;
-    --plate-edge: #C3BFB2;
-    --ink: #191C22;
-    --ink-soft: #5A5F68;
-    --ink-faint: #8B8F96;
-    --cyan: #0E7C93;
-    --magenta: #B22F62;
-    --rule: #C7C3B6;
-    --shadow: rgba(25, 28, 34, .22);
-    --focus: #0E7C93;
-  }
-
   * { box-sizing: border-box; }
 
-  body {
+  html, body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100%;
+    background: var(--sky-top);
+  }
+
+  body {
     color: var(--ink);
     font-family: var(--body);
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
 
-  .wrap {
-    max-width: 940px;
-    margin: 0 auto;
-    padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 32px) 64px;
+  canvas#sky-base, canvas#sky-stars {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .sheet {
+    max-width: 1000px;
+    margin: clamp(20px, 5vw, 64px) auto;
+    background: var(--paper);
+    border: 1px solid var(--paper-edge);
+    border-radius: 2px;
+    box-shadow: 0 2px 0 color-mix(in srgb, var(--ink) 5%, transparent),
+                0 40px 90px -30px rgba(0, 0, 0, .65),
+                0 0 120px -40px color-mix(in srgb, var(--brass) 45%, transparent);
+    padding: clamp(22px, 4.5vw, 48px) clamp(18px, 4vw, 40px) 40px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 30px;
   }
 
   /* ---- masthead of the page itself ---- */
@@ -93,8 +69,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: 20px;
+    border-bottom: 1px solid var(--paper-edge);
+    padding-bottom: 22px;
   }
 
   .eyebrow {
@@ -102,7 +78,7 @@
     font-size: 11px;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: var(--cyan);
+    color: var(--brass-deep);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -112,14 +88,14 @@
     content: "";
     width: 22px;
     height: 1px;
-    background: var(--magenta);
+    background: var(--indigo);
   }
 
   h1 {
     margin: 0;
     font-family: var(--display);
     font-weight: 400;
-    font-size: clamp(30px, 5.4vw, 46px);
+    font-size: clamp(30px, 5.2vw, 44px);
     letter-spacing: -.015em;
     line-height: 1.05;
     text-wrap: balance;
@@ -130,6 +106,136 @@
     max-width: 62ch;
     color: var(--ink-soft);
     font-size: 15px;
+  }
+
+  /* ---- gallery of editions ---- */
+  .gallery-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .gallery-head h2 {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 760px) {
+    .gallery { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .gallery { grid-template-columns: 1fr 1fr; }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid var(--paper-edge);
+    border-radius: 2px;
+    padding: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+  }
+
+  .card:hover {
+    border-color: var(--brass);
+    transform: translateY(-2px);
+  }
+
+  .card:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .card[aria-pressed="true"] {
+    border-color: var(--brass-deep);
+    box-shadow: 0 10px 24px -14px var(--shadow), 0 0 0 1px var(--brass-deep) inset;
+    transform: translateY(-2px);
+  }
+
+  .thumb-wrap {
+    position: relative;
+    border: 1px solid var(--plate-edge);
+    background: var(--plate);
+    overflow: hidden;
+  }
+
+  .thumb-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 14px rgba(0, 0, 0, .18);
+    pointer-events: none;
+  }
+
+  svg.thumb { display: block; width: 100%; height: auto; }
+
+  .card[aria-pressed="true"] .thumb-wrap {
+    border-color: var(--brass-deep);
+  }
+
+  .card-meta { display: flex; flex-direction: column; gap: 1px; padding: 0 2px; }
+
+  .card-no {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--brass-deep);
+  }
+
+  .card-title {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+
+  /* ---- now-solving strip ---- */
+  .now {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    background: var(--plate);
+    border: 1px solid var(--plate-edge);
+    border-left: 3px solid var(--brass-deep);
+  }
+
+  .now-kicker {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brass-deep);
+  }
+
+  .now-blurb {
+    margin: 0;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink);
+    text-wrap: balance;
   }
 
   /* ---- toolbar ---- */
@@ -147,7 +253,7 @@
     text-transform: uppercase;
     color: var(--ink);
     background: transparent;
-    border: 1px solid var(--rule);
+    border: 1px solid var(--paper-edge);
     border-radius: 2px;
     padding: 8px 14px;
     cursor: pointer;
@@ -155,14 +261,14 @@
   }
 
   button:hover, .filebtn:hover {
-    border-color: var(--cyan);
-    color: var(--cyan);
+    border-color: var(--brass-deep);
+    color: var(--brass-deep);
   }
 
   button[aria-pressed="true"] {
-    border-color: var(--cyan);
-    background: color-mix(in srgb, var(--cyan) 14%, transparent);
-    color: var(--cyan);
+    border-color: var(--brass-deep);
+    background: color-mix(in srgb, var(--brass) 16%, transparent);
+    color: var(--brass-deep);
   }
 
   button:focus-visible, .filebtn:focus-within {
@@ -183,10 +289,7 @@
     color: var(--ink-faint);
   }
 
-  .readout b {
-    font-weight: 400;
-    color: var(--ink);
-  }
+  .readout b { font-weight: 400; color: var(--ink); }
 
   /* ---- the plate ---- */
   .stage {
@@ -195,7 +298,7 @@
     border: 1px solid var(--plate-edge);
     border-radius: 3px;
     padding: 10px;
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
                 0 18px 40px -28px var(--shadow);
     touch-action: none;
   }
@@ -221,10 +324,7 @@
   }
 
   .piece:focus { outline: none; }
-  .piece:focus-visible .seam {
-    stroke: var(--focus);
-    stroke-width: 2.2;
-  }
+  .piece:focus-visible .seam { stroke: var(--focus); stroke-width: 2.2; }
 
   .board-outline {
     fill: none;
@@ -235,8 +335,8 @@
   }
 
   .reg { stroke-width: 1; fill: none; }
-  .reg-c { stroke: var(--cyan); }
-  .reg-m { stroke: var(--magenta); }
+  .reg-a { stroke: var(--brass-deep); }
+  .reg-b { stroke: var(--indigo); }
 
   .tray-label {
     font-family: var(--mono);
@@ -246,7 +346,7 @@
   }
 
   #ghost { opacity: 0; transition: opacity .25s ease; pointer-events: none; }
-  #ghost.on { opacity: .17; }
+  #ghost.on { opacity: .18; }
 
   #pieces { transition: transform .6s cubic-bezier(.2, .8, .3, 1); }
   .stage.done #pieces { transform: translateY(-4px); }
@@ -274,12 +374,12 @@
     font-size: 11px;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: var(--magenta);
+    color: var(--brass-deep);
     font-style: normal;
   }
 
   footer {
-    border-top: 1px solid var(--rule);
+    border-top: 1px solid var(--paper-edge);
     padding-top: 16px;
     font-size: 12.5px;
     color: var(--ink-faint);
@@ -292,12 +392,25 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<canvas id="sky-base" aria-hidden="true"></canvas>
+<canvas id="sky-stars" aria-hidden="true"></canvas>
+
+<div class="sheet">
   <header>
-    <div class="eyebrow">Composing room &middot; Issue No.&nbsp;21</div>
+    <div class="eyebrow">Composing room &middot; after hours</div>
     <h1>Rebuild the Cover</h1>
-    <p class="lede">A newsstand cover, cut into five bands and scattered across the plate. Drag each band back into the dashed frame &mdash; it snaps home when it&rsquo;s close. Arrow keys nudge a selected piece; Enter drops it.</p>
+    <p class="lede">Five original cover illustrations, each in the spirit of a classic newsstand magazine and each cut into five interlocking bands. Pick an edition below, then drag its bands back into the dashed frame &mdash; a piece snaps home when it&rsquo;s close. Arrow keys nudge a selected piece; Enter drops it.</p>
   </header>
+
+  <div>
+    <div class="gallery-head"><h2>Choose an edition</h2></div>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+  <div class="now" aria-live="polite">
+    <p class="now-kicker" id="nowKicker">Rebuild the Cover &mdash; The Metropolitan, Edition No. 21</p>
+    <p class="now-blurb" id="nowBlurb">The Skyline Issue &mdash; dusk settles over the avenue as the lights come up, one window at a time.</p>
+  </div>
 
   <div class="toolbar">
     <button id="shuffle" type="button">Scatter again</button>
@@ -312,52 +425,19 @@
   <div class="stage" id="stage">
     <svg id="svg" viewBox="0 0 700 470" role="application" aria-label="Five-piece cover puzzle">
       <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#7EA8B4"/>
-          <stop offset=".46" stop-color="#D9CBA6"/>
-          <stop offset="1" stop-color="#E9B978"/>
-        </linearGradient>
-        <clipPath id="coverClip"><rect x="0" y="0" width="260" height="360"/></clipPath>
-        <clipPath id="skyClip"><rect x="14" y="52" width="232" height="252"/></clipPath>
-
-        <!-- the cover artwork, drawn once, reused by every piece -->
+        <g id="dynDefs"></g>
         <g id="art">
           <rect width="260" height="360" fill="#F1EDE3"/>
           <image id="userArt" x="0" y="0" width="260" height="360"
                  preserveAspectRatio="xMidYMid slice" style="display:none"/>
-          <g id="drawnArt">
-            <g clip-path="url(#skyClip)">
-              <rect x="14" y="52" width="232" height="252" fill="url(#sky)"/>
-              <circle cx="172" cy="178" r="37" fill="#E9A33C"/>
-              <g id="skyline"></g>
-            </g>
-            <path d="M40 84 q5-5 10 0 q5-5 10 0" fill="none" stroke="#3A5563" stroke-width="1.4" stroke-linecap="round"/>
-            <path d="M66 72 q4-4 8 0 q4-4 8 0" fill="none" stroke="#3A5563" stroke-width="1.2" stroke-linecap="round"/>
-            <path d="M52 100 q3.5-3.5 7 0 q3.5-3.5 7 0" fill="none" stroke="#3A5563" stroke-width="1.1" stroke-linecap="round"/>
-
-            <text x="130" y="36" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
-                  font-size="27" letter-spacing="0.4" fill="#16202A">The Metropolitan</text>
-            <text x="16" y="20" font-family="ui-monospace, Consolas, monospace" font-size="6.5"
-                  letter-spacing="1.4" fill="#5E6A72">VOL. XCIX</text>
-            <text x="244" y="20" text-anchor="end" font-family="ui-monospace, Consolas, monospace" font-size="6.5"
-                  letter-spacing="1.4" fill="#5E6A72">NO. 21</text>
-            <line x1="14" y1="44" x2="246" y2="44" stroke="#16202A" stroke-width="0.8"/>
-
-            <line x1="14" y1="316" x2="246" y2="316" stroke="#16202A" stroke-width="0.8"/>
-            <text x="130" y="334" text-anchor="middle" font-family="ui-monospace, Consolas, monospace"
-                  font-size="8" letter-spacing="3.2" fill="#16202A">THE SKYLINE ISSUE</text>
-            <text x="130" y="348" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
-                  font-size="8.5" fill="#6B6357">August 1, 2026 &#183; eight dollars</text>
-            <rect x="8" y="8" width="244" height="344" fill="none" stroke="#16202A" stroke-width="0.7" opacity=".55"/>
-          </g>
+          <g id="drawnArt"></g>
         </g>
       </defs>
 
-      <!-- registration marks on the plate -->
-      <g class="reg reg-c" opacity=".7">
+      <g class="reg reg-a" opacity=".7">
         <path d="M18 18 h14 M25 11 v14"/><path d="M682 452 h-14 M675 459 v-14"/>
       </g>
-      <g class="reg reg-m" opacity=".7">
+      <g class="reg reg-b" opacity=".7">
         <path d="M682 18 h-14 M675 11 v14"/><path d="M18 452 h14 M25 459 v-14"/>
       </g>
 
@@ -373,14 +453,292 @@
   <p class="status" id="status">Five bands loose on the plate.</p>
 
   <footer>
-    The cover art here was drawn for this page &mdash; it&rsquo;s an original illustration in the newsstand style, not a scan of a real magazine. Load your own image to puzzle it instead; the file stays in your browser and is never uploaded.
+    Each cover here is an original illustration drawn for this page in the spirit of classic New Yorker&ndash;style newsstand art &mdash; none are scans or reproductions of real covers. Load your own image from the toolbar above to puzzle it instead; the file stays in your browser and is never uploaded.
   </footer>
 </div>
 
 <script>
+/* ================= night-sky backdrop ================= */
+(function () {
+  const base = document.getElementById('sky-base');
+  const starsCv = document.getElementById('sky-stars');
+  const bctx = base.getContext('2d');
+  const sctx = starsCv.getContext('2d');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let stars = [], w = 0, h = 0, dpr = 1;
+
+  function sizeCanvas(cv, ctx) {
+    cv.width = w * dpr; cv.height = h * dpr;
+    cv.style.width = w + 'px'; cv.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function seedStars() {
+    const count = Math.max(70, Math.round((w * h) / 4200));
+    stars = Array.from({ length: count }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h * 0.88,
+      r: Math.random() * 1.2 + 0.3,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.4 + Math.random() * 0.8
+    }));
+  }
+
+  function drawBase() {
+    const g = bctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#04060d');
+    g.addColorStop(0.55, '#101a34');
+    g.addColorStop(1, '#2b3766');
+    bctx.fillStyle = g;
+    bctx.fillRect(0, 0, w, h);
+
+    const mx = w * 0.84, my = h * 0.15, mr = Math.min(w, h) * 0.05;
+    const glow = bctx.createRadialGradient(mx, my, 0, mx, my, mr * 5);
+    glow.addColorStop(0, 'rgba(246,236,214,0.32)');
+    glow.addColorStop(1, 'rgba(246,236,214,0)');
+    bctx.fillStyle = glow;
+    bctx.beginPath(); bctx.arc(mx, my, mr * 5, 0, Math.PI * 2); bctx.fill();
+    bctx.fillStyle = '#f6ecd6';
+    bctx.beginPath(); bctx.arc(mx, my, mr, 0, Math.PI * 2); bctx.fill();
+
+    let seed = 42;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    bctx.fillStyle = 'rgba(4,6,13,0.92)';
+    const baseY = h * 0.92;
+    let x = -20;
+    while (x < w + 20) {
+      const bw = 24 + rnd() * 44;
+      const bh = 26 + rnd() * Math.min(150, h * 0.24);
+      bctx.fillRect(x, baseY - bh, bw, bh + 60);
+      x += bw + 2 + rnd() * 6;
+    }
+  }
+
+  function drawStars(t) {
+    sctx.clearRect(0, 0, w, h);
+    stars.forEach(s => {
+      const tw = reduceMotion ? 0.85 : 0.5 + 0.5 * Math.sin(t * 0.0009 * s.speed + s.phase);
+      sctx.globalAlpha = tw;
+      sctx.fillStyle = '#eef2ff';
+      sctx.beginPath();
+      sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      sctx.fill();
+    });
+    sctx.globalAlpha = 1;
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth; h = window.innerHeight;
+    sizeCanvas(base, bctx);
+    sizeCanvas(starsCv, sctx);
+    seedStars();
+    drawBase();
+    drawStars(0);
+  }
+
+  function loop(t) {
+    drawStars(t);
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  if (!reduceMotion) requestAnimationFrame(loop);
+})();
+
+/* ================= cover illustrations ================= */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(name, attrs) {
+  const n = document.createElementNS(SVGNS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+}
+function text(str, attrs) {
+  const t = el('text', attrs);
+  t.textContent = str;
+  return t;
+}
+
+const SX = 14, SY = 52, SW = 232, SH = 252;
+
+function skyGradient(defs, ns, stops) {
+  const grad = el('linearGradient', { id: ns + '-sky', x1: 0, y1: 0, x2: 0, y2: 1 });
+  stops.forEach(s => grad.appendChild(el('stop', { offset: s.o, 'stop-color': s.c })));
+  defs.appendChild(grad);
+  return 'url(#' + ns + '-sky)';
+}
+function clipRect(defs, ns, name, attrs) {
+  const clip = el('clipPath', { id: ns + '-' + name });
+  clip.appendChild(el('rect', attrs));
+  defs.appendChild(clip);
+  return 'url(#' + ns + '-' + name + ')';
+}
+
+function drawFrame(g, info) {
+  g.appendChild(text('The Metropolitan', { x: 130, y: 36, 'text-anchor': 'middle', 'font-family': 'Georgia, serif', 'font-style': 'italic', 'font-size': 26, 'letter-spacing': '0.4', fill: '#16202A' }));
+  g.appendChild(text('VOL. XCIX', { x: 16, y: 20, 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 6.5, 'letter-spacing': '1.4', fill: '#5E6A72' }));
+  g.appendChild(text('NO. ' + info.no, { x: 244, y: 20, 'text-anchor': 'end', 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 6.5, 'letter-spacing': '1.4', fill: '#5E6A72' }));
+  g.appendChild(el('line', { x1: 14, y1: 44, x2: 246, y2: 44, stroke: '#16202A', 'stroke-width': 0.8 }));
+  g.appendChild(el('line', { x1: 14, y1: 316, x2: 246, y2: 316, stroke: '#16202A', 'stroke-width': 0.8 }));
+  g.appendChild(text(info.title.toUpperCase(), { x: 130, y: 334, 'text-anchor': 'middle', 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 7.4, 'letter-spacing': '2.4', fill: '#16202A' }));
+  g.appendChild(text(info.dateStr, { x: 130, y: 348, 'text-anchor': 'middle', 'font-family': 'Georgia, serif', 'font-style': 'italic', 'font-size': 8.5, fill: '#6B6357' }));
+  g.appendChild(el('rect', { x: 8, y: 8, width: 244, height: 344, fill: 'none', stroke: '#16202A', 'stroke-width': 0.7, opacity: .55 }));
+}
+
+function drawSkyline(g, defs, ns) {
+  const skyUrl = skyGradient(defs, ns, [{ o: 0, c: '#7EA8B4' }, { o: .46, c: '#D9CBA6' }, { o: 1, c: '#E9B978' }]);
+  const clipUrl = clipRect(defs, ns, 'clip', { x: SX, y: SY, width: SW, height: SH });
+  const scene = el('g', { 'clip-path': clipUrl });
+  scene.appendChild(el('rect', { x: SX, y: SY, width: SW, height: SH, fill: skyUrl }));
+  scene.appendChild(el('circle', { cx: 172, cy: 178, r: 37, fill: '#E9A33C' }));
+  const towers = [
+    { x: 14, w: 30, h: 96, f: '#2C5468' }, { x: 44, w: 22, h: 140, f: '#1B3C4C' },
+    { x: 66, w: 34, h: 72, f: '#35667C' }, { x: 100, w: 26, h: 176, f: '#12303E' },
+    { x: 126, w: 30, h: 110, f: '#244B5E' }, { x: 156, w: 20, h: 150, f: '#1B3C4C' },
+    { x: 176, w: 40, h: 88, f: '#2C5468' }, { x: 216, w: 30, h: 124, f: '#16333F' }
+  ];
+  const GROUND = 304;
+  towers.forEach((t, i) => {
+    const top = GROUND - t.h;
+    scene.appendChild(el('rect', { x: t.x, y: top, width: t.w, height: t.h, fill: t.f }));
+    if (i === 3) {
+      scene.appendChild(el('rect', { x: t.x + 8, y: top - 16, width: t.w - 16, height: 16, fill: t.f }));
+      scene.appendChild(el('rect', { x: t.x + t.w / 2 - 1, y: top - 34, width: 2, height: 18, fill: t.f }));
+    }
+    if (i === 6) {
+      scene.appendChild(el('rect', { x: t.x + 12, y: top - 13, width: 14, height: 11, fill: '#0E2833' }));
+      scene.appendChild(el('path', { d: `M${t.x + 11} ${top - 13} l7 -7 l7 7 z`, fill: '#0E2833' }));
+    }
+    const cols = Math.floor((t.w - 6) / 8), rows = Math.floor((t.h - 10) / 11);
+    for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+      if ((i * 7 + c * 13 + r * 5) % 4 === 0) continue;
+      const warm = (i * 3 + c * 5 + r * 11) % 3 === 0;
+      scene.appendChild(el('rect', { x: t.x + 4 + c * 8, y: top + 7 + r * 11, width: 3.4, height: 4.6, fill: warm ? '#F6CE85' : '#9FBAC4', opacity: warm ? .95 : .5 }));
+    }
+  });
+  g.appendChild(scene);
+  g.appendChild(el('path', { d: 'M40 84 q5-5 10 0 q5-5 10 0', fill: 'none', stroke: '#3A5563', 'stroke-width': 1.4, 'stroke-linecap': 'round' }));
+  g.appendChild(el('path', { d: 'M66 72 q4-4 8 0 q4-4 8 0', fill: 'none', stroke: '#3A5563', 'stroke-width': 1.2, 'stroke-linecap': 'round' }));
+}
+
+function drawHarvest(g, defs, ns) {
+  const skyUrl = skyGradient(defs, ns, [{ o: 0, c: '#F4C77A' }, { o: .5, c: '#EFA25C' }, { o: 1, c: '#D9723F' }]);
+  const clipUrl = clipRect(defs, ns, 'clip', { x: SX, y: SY, width: SW, height: SH });
+  const scene = el('g', { 'clip-path': clipUrl });
+  scene.appendChild(el('rect', { x: SX, y: SY, width: SW, height: SH, fill: skyUrl }));
+  scene.appendChild(el('rect', { x: SX, y: 250, width: SW, height: SY + SH - 250, fill: '#8A6A45' }));
+  scene.appendChild(el('rect', { x: SX, y: 246, width: SW, height: 6, fill: '#B9895A' }));
+  scene.appendChild(el('rect', { x: 150, y: 150, width: 8, height: 100, fill: '#5B3E2B' }));
+  [{ cx: 154, cy: 130, r: 34, fill: '#C1502E' }, { cx: 130, cy: 150, r: 26, fill: '#D97B3B' },
+   { cx: 178, cy: 148, r: 28, fill: '#E4A23F' }, { cx: 154, cy: 110, r: 24, fill: '#A83F27' }]
+    .forEach(c => scene.appendChild(el('circle', c)));
+  scene.appendChild(el('rect', { x: 44, y: 236, width: 46, height: 5, fill: '#3A2B1E' }));
+  scene.appendChild(el('rect', { x: 48, y: 241, width: 4, height: 12, fill: '#3A2B1E' }));
+  scene.appendChild(el('rect', { x: 82, y: 241, width: 4, height: 12, fill: '#3A2B1E' }));
+  scene.appendChild(el('rect', { x: 206, y: 150, width: 3, height: 100, fill: '#2E2A22' }));
+  scene.appendChild(el('circle', { cx: 207.5, cy: 146, r: 6, fill: '#F6D98A' }));
+  const cols = ['#C1502E', '#E4A23F', '#D97B3B'];
+  for (let i = 0; i < 14; i++) {
+    const lx = SX + (i * 37 % SW), ly = SY + 20 + (i * 53 % (SH - 40));
+    scene.appendChild(el('ellipse', { cx: lx, cy: ly, rx: 3, ry: 2, fill: cols[i % 3], transform: `rotate(${(i * 37) % 180} ${lx} ${ly})` }));
+  }
+  g.appendChild(scene);
+}
+
+function drawSnow(g, defs, ns) {
+  const skyUrl = skyGradient(defs, ns, [{ o: 0, c: '#B9C6D6' }, { o: .55, c: '#D8E1EA' }, { o: 1, c: '#EFF3F7' }]);
+  const clipUrl = clipRect(defs, ns, 'clip', { x: SX, y: SY, width: SW, height: SH });
+  const scene = el('g', { 'clip-path': clipUrl });
+  scene.appendChild(el('rect', { x: SX, y: SY, width: SW, height: SH, fill: skyUrl }));
+  const roofs = [
+    { x: 14, w: 40, h: 70, f: '#5B6472' }, { x: 54, w: 30, h: 100, f: '#48505C' },
+    { x: 84, w: 50, h: 60, f: '#5B6472' }, { x: 134, w: 34, h: 120, f: '#3C434D' },
+    { x: 168, w: 44, h: 80, f: '#5B6472' }, { x: 212, w: 34, h: 96, f: '#48505C' }
+  ];
+  const GROUND = 304;
+  roofs.forEach((r, i) => {
+    const top = GROUND - r.h;
+    scene.appendChild(el('rect', { x: r.x, y: top, width: r.w, height: r.h, fill: r.f }));
+    scene.appendChild(el('rect', { x: r.x - 1, y: top - 3, width: r.w + 2, height: 4, fill: '#F4F8FC' }));
+    const cols = Math.floor(r.w / 10), rows = Math.floor(r.h / 16);
+    for (let c = 0; c < cols; c++) for (let row = 0; row < rows; row++) {
+      if ((i * 5 + c * 3 + row * 7) % 3 === 0) continue;
+      scene.appendChild(el('rect', { x: r.x + 4 + c * 10, y: top + 8 + row * 16, width: 3.6, height: 4.4, fill: '#F6CE85', opacity: .9 }));
+    }
+    if (i % 2 === 0) {
+      scene.appendChild(el('rect', { x: r.x + r.w - 12, y: top - 14, width: 6, height: 12, fill: '#37404A' }));
+      scene.appendChild(el('path', { d: `M${r.x + r.w - 9} ${top - 14} q-4 -8 2 -14 q6 -6 0 -14`, fill: 'none', stroke: '#E7ECF1', 'stroke-width': 2, 'stroke-linecap': 'round', opacity: .7 }));
+    }
+  });
+  for (let i = 0; i < 26; i++) {
+    const sx = SX + (i * 29 % SW), sy = SY + (i * 41 % SH);
+    scene.appendChild(el('circle', { cx: sx, cy: sy, r: (i % 3 === 0) ? 1.6 : 1, fill: '#FFFFFF', opacity: .85 }));
+  }
+  g.appendChild(scene);
+}
+
+function drawRain(g, defs, ns) {
+  const skyUrl = skyGradient(defs, ns, [{ o: 0, c: '#5C6B7A' }, { o: .55, c: '#7C8C99' }, { o: 1, c: '#9AA7B0' }]);
+  const clipUrl = clipRect(defs, ns, 'clip', { x: SX, y: SY, width: SW, height: SH });
+  const scene = el('g', { 'clip-path': clipUrl });
+  scene.appendChild(el('rect', { x: SX, y: SY, width: SW, height: SH, fill: skyUrl }));
+  const bld = [{ x: 20, w: 40, h: 90, f: '#48525C' }, { x: 64, w: 30, h: 120, f: '#3E4750' }, { x: 100, w: 50, h: 80, f: '#48525C' }, { x: 158, w: 36, h: 110, f: '#3E4750' }, { x: 200, w: 44, h: 70, f: '#48525C' }];
+  const GROUND = 230;
+  bld.forEach(b => scene.appendChild(el('rect', { x: b.x, y: GROUND - b.h, width: b.w, height: b.h, fill: b.f })));
+  const pave = el('linearGradient', { id: ns + '-pave', x1: 0, y1: 0, x2: 0, y2: 1 });
+  pave.appendChild(el('stop', { offset: 0, 'stop-color': '#2C333A' }));
+  pave.appendChild(el('stop', { offset: 1, 'stop-color': '#1B2126' }));
+  defs.appendChild(pave);
+  scene.appendChild(el('rect', { x: SX, y: GROUND, width: SW, height: SY + SH - GROUND, fill: `url(#${ns}-pave)` }));
+  for (let i = 0; i < 5; i++) scene.appendChild(el('rect', { x: 30 + i * 40, y: GROUND + 4, width: 3, height: 26, fill: '#F6CE85', opacity: .35 }));
+  for (let i = 0; i < 20; i++) {
+    const rx = SX + (i * 23 % SW), ry = SY + (i * 31 % SH);
+    scene.appendChild(el('line', { x1: rx, y1: ry, x2: rx - 4, y2: ry + 14, stroke: '#D8E4EC', 'stroke-width': 1, opacity: .35 }));
+  }
+  const umbCols = ['#B5442E', '#2C5A6B', '#3E3350', '#4B6B3A'];
+  for (let i = 0; i < 4; i++) {
+    const ux = 44 + i * 54, uy = GROUND - 6;
+    scene.appendChild(el('path', { d: `M${ux - 14} ${uy} a14 12 0 0 1 28 0 z`, fill: umbCols[i % umbCols.length] }));
+    scene.appendChild(el('line', { x1: ux, y1: uy, x2: ux, y2: uy + 16, stroke: '#20262B', 'stroke-width': 1.4 }));
+  }
+  g.appendChild(scene);
+}
+
+function drawBloom(g, defs, ns) {
+  const skyUrl = skyGradient(defs, ns, [{ o: 0, c: '#F6DCE3' }, { o: .5, c: '#F3E7D0' }, { o: 1, c: '#DCE9E0' }]);
+  const clipUrl = clipRect(defs, ns, 'clip', { x: SX, y: SY, width: SW, height: SH });
+  const scene = el('g', { 'clip-path': clipUrl });
+  scene.appendChild(el('rect', { x: SX, y: SY, width: SW, height: SH, fill: skyUrl }));
+  scene.appendChild(el('rect', { x: SX, y: 270, width: SW, height: SY + SH - 270, fill: '#8B8172' }));
+  for (let i = 0; i < 14; i++) scene.appendChild(el('rect', { x: SX + 6 + i * 16, y: 250, width: 3, height: 20, fill: '#5C564A' }));
+  scene.appendChild(el('rect', { x: SX, y: 248, width: SW, height: 3, fill: '#5C564A' }));
+  scene.appendChild(el('path', { d: 'M40 260 q20 -60 70 -90 q30 -18 60 -14', fill: 'none', stroke: '#6B4A3A', 'stroke-width': 3, 'stroke-linecap': 'round' }));
+  for (let i = 0; i < 22; i++) {
+    const t = i / 22;
+    const bx = 40 + t * 130 + (i % 3) * 4, by = 260 - t * 130 + Math.sin(i) * 8;
+    scene.appendChild(el('circle', { cx: bx, cy: by, r: 4 + (i % 3), fill: i % 4 === 0 ? '#F7C6D6' : '#FBDCE6' }));
+  }
+  scene.appendChild(el('line', { x1: 150, y1: 90, x2: 236, y2: 100, stroke: '#5C564A', 'stroke-width': 1 }));
+  scene.appendChild(el('rect', { x: 170, y: 100, width: 16, height: 20, fill: '#E7ECE3' }));
+  scene.appendChild(el('rect', { x: 196, y: 100, width: 14, height: 18, fill: '#DCE6E9' }));
+  g.appendChild(scene);
+  g.appendChild(el('path', { d: 'M70 70 q5-5 10 0 q5-5 10 0', fill: 'none', stroke: '#5C564A', 'stroke-width': 1.2, 'stroke-linecap': 'round' }));
+  g.appendChild(el('path', { d: 'M96 84 q4-4 8 0 q4-4 8 0', fill: 'none', stroke: '#5C564A', 'stroke-width': 1, 'stroke-linecap': 'round' }));
+}
+
+const EDITIONS = [
+  { id: 'skyline', no: 21, title: 'The Skyline Issue', dateStr: 'August 1, 2026 · eight dollars', blurb: 'Dusk settles over the avenue as the lights come up, one window at a time.', draw: drawSkyline },
+  { id: 'harvest', no: 22, title: 'The Harvest Issue', dateStr: 'October 12, 2026 · eight dollars', blurb: 'Amber leaves drift across the promenade on the first cold morning.', draw: drawHarvest },
+  { id: 'snow', no: 23, title: 'The Snow Issue', dateStr: 'December 21, 2026 · eight dollars', blurb: 'The city exhales steam into a hushed, snow-quiet morning.', draw: drawSnow },
+  { id: 'rain', no: 24, title: 'The Rain Issue', dateStr: 'April 5, 2027 · eight dollars', blurb: 'Umbrellas bloom along the crosswalk as the avenue turns to reflection.', draw: drawRain },
+  { id: 'bloom', no: 25, title: 'The Bloom Issue', dateStr: 'May 24, 2027 · eight dollars', blurb: 'Blossoms crowd the fire escape as the rooftop garden wakes up.', draw: drawBloom }
+];
+
+/* ================= puzzle mechanics ================= */
 (function () {
   const W = 260, H = 360, N = 5, BH = H / N;
-  const BX = 30, BY = 45;          // home position of every piece
+  const BX = 30, BY = 45;
   const TX = 352, TY = 30, ROW = 78, SNAP = 24;
 
   const svg = document.getElementById('svg');
@@ -389,56 +747,78 @@
   const statusEl = document.getElementById('status');
   const countEl = document.getElementById('count');
   const clockEl = document.getElementById('clock');
+  const drawnArt = document.getElementById('drawnArt');
+  const dynDefs = document.getElementById('dynDefs');
+  const userArt = document.getElementById('userArt');
 
-  /* ---------- skyline: deterministic buildings + lit windows ---------- */
-  const towers = [
-    { x: 14,  w: 30, h: 96,  f: '#2C5468' },
-    { x: 44,  w: 22, h: 140, f: '#1B3C4C' },
-    { x: 66,  w: 34, h: 72,  f: '#35667C' },
-    { x: 100, w: 26, h: 176, f: '#12303E' },
-    { x: 126, w: 30, h: 110, f: '#244B5E' },
-    { x: 156, w: 20, h: 150, f: '#1B3C4C' },
-    { x: 176, w: 40, h: 88,  f: '#2C5468' },
-    { x: 216, w: 30, h: 124, f: '#16333F' }
-  ];
-  const GROUND = 304, SVGNS = 'http://www.w3.org/2000/svg';
-  const sky = document.getElementById('skyline');
-
-  function el(name, attrs) {
-    const n = document.createElementNS(SVGNS, name);
-    for (const k in attrs) n.setAttribute(k, attrs[k]);
-    return n;
+  function buildArt(edition) {
+    while (dynDefs.firstChild) dynDefs.removeChild(dynDefs.firstChild);
+    while (drawnArt.firstChild) drawnArt.removeChild(drawnArt.firstChild);
+    edition.draw(drawnArt, dynDefs, 'main');
+    drawFrame(drawnArt, edition);
   }
 
-  towers.forEach((t, i) => {
-    const top = GROUND - t.h;
-    sky.appendChild(el('rect', { x: t.x, y: top, width: t.w, height: t.h, fill: t.f }));
-    if (i === 3) {                                   // setback + spire on the tallest
-      sky.appendChild(el('rect', { x: t.x + 8, y: top - 16, width: t.w - 16, height: 16, fill: t.f }));
-      sky.appendChild(el('rect', { x: t.x + t.w / 2 - 1, y: top - 34, width: 2, height: 18, fill: t.f }));
-    }
-    if (i === 6) {                                   // rooftop water tower
-      sky.appendChild(el('rect', { x: t.x + 12, y: top - 13, width: 14, height: 11, fill: '#0E2833' }));
-      sky.appendChild(el('path', { d: `M${t.x + 11} ${top - 13} l7 -7 l7 7 z`, fill: '#0E2833' }));
-      sky.appendChild(el('rect', { x: t.x + 14, y: top - 2, width: 2, height: 3, fill: '#0E2833' }));
-      sky.appendChild(el('rect', { x: t.x + 22, y: top - 2, width: 2, height: 3, fill: '#0E2833' }));
-    }
-    const cols = Math.floor((t.w - 6) / 8), rows = Math.floor((t.h - 10) / 11);
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        if ((i * 7 + c * 13 + r * 5) % 4 === 0) continue;   // some windows dark
-        const warm = (i * 3 + c * 5 + r * 11) % 3 === 0;
-        sky.appendChild(el('rect', {
-          x: t.x + 4 + c * 8, y: top + 7 + r * 11, width: 3.4, height: 4.6,
-          fill: warm ? '#F6CE85' : '#9FBAC4', opacity: warm ? .95 : .5
-        }));
-      }
-    }
-  });
+  function buildThumb(edition) {
+    const svgEl = document.createElementNS(SVGNS, 'svg');
+    svgEl.setAttribute('viewBox', '0 0 260 360');
+    svgEl.setAttribute('class', 'thumb');
+    svgEl.setAttribute('aria-hidden', 'true');
+    const defs = el('defs', {});
+    const dyn = el('g', {});
+    defs.appendChild(dyn);
+    svgEl.appendChild(defs);
+    svgEl.appendChild(el('rect', { width: 260, height: 360, fill: '#F1EDE3' }));
+    const artG = el('g', {});
+    svgEl.appendChild(artG);
+    edition.draw(artG, dyn, 'th-' + edition.id);
+    drawFrame(artG, edition);
+    return svgEl;
+  }
+
+  let currentIdx = -1;
+  function selectEdition(i) {
+    if (i === currentIdx) return;
+    currentIdx = i;
+    const edition = EDITIONS[i];
+    document.querySelectorAll('.card').forEach((c, ci) => c.setAttribute('aria-pressed', String(ci === i)));
+    userArt.style.display = 'none';
+    drawnArt.style.display = '';
+    buildArt(edition);
+    document.getElementById('nowKicker').textContent = `Rebuild the Cover — The Metropolitan, Edition No. ${edition.no}`;
+    document.getElementById('nowBlurb').textContent = `${edition.title} — ${edition.blurb}`;
+    scatter();
+  }
+
+  function buildGallery() {
+    const gallery = document.getElementById('gallery');
+    EDITIONS.forEach((edition, i) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card';
+      card.setAttribute('aria-pressed', 'false');
+      const thumbWrap = document.createElement('div');
+      thumbWrap.className = 'thumb-wrap';
+      thumbWrap.appendChild(buildThumb(edition));
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+      const no = document.createElement('span');
+      no.className = 'card-no';
+      no.textContent = 'No. ' + edition.no;
+      const title = document.createElement('span');
+      title.className = 'card-title';
+      title.textContent = edition.title;
+      meta.appendChild(no);
+      meta.appendChild(title);
+      card.appendChild(thumbWrap);
+      card.appendChild(meta);
+      card.addEventListener('click', () => selectEdition(i));
+      gallery.appendChild(card);
+    });
+  }
 
   /* ---------- piece geometry ---------- */
-  const knobX = [118, 146, 112, 152];        // where each seam's tab sits
-  const knobDir = [1, -1, 1, -1];            // which way it bulges
+  const knobX = [118, 146, 112, 152];
+  const knobDir = [1, -1, 1, -1];
   const R = 13;
 
   function edge(y, cx, d, leftToRight) {
@@ -457,7 +837,6 @@
     return d + ' Z';
   }
 
-  /* ---------- build pieces ---------- */
   const defs = svg.querySelector('defs');
   const pieces = [];
 
@@ -482,7 +861,6 @@
 
   const place = p => p.g.setAttribute('transform', `translate(${p.tx} ${p.ty})`);
 
-  /* ---------- state ---------- */
   let started = 0, timer = null, solved = 0;
 
   function scatter() {
@@ -533,7 +911,6 @@
     return true;
   }
 
-  /* ---------- pointer dragging ---------- */
   const pt = svg.createSVGPoint();
   function toSvg(e) {
     pt.x = e.clientX; pt.y = e.clientY;
@@ -593,7 +970,6 @@
     });
   });
 
-  /* ---------- controls ---------- */
   document.getElementById('shuffle').addEventListener('click', scatter);
 
   const peek = document.getElementById('peek');
@@ -609,17 +985,20 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const img = document.getElementById('userArt');
-      img.setAttribute('href', reader.result);
-      img.style.display = '';
-      document.getElementById('drawnArt').style.display = 'none';
+      userArt.setAttribute('href', reader.result);
+      userArt.style.display = '';
+      drawnArt.style.display = 'none';
+      document.querySelectorAll('.card').forEach(c => c.setAttribute('aria-pressed', 'false'));
+      currentIdx = -1;
+      document.getElementById('nowKicker').textContent = 'Rebuild the Cover — a cover of your own';
+      document.getElementById('nowBlurb').textContent = 'Loaded from your device — never uploaded anywhere.';
       scatter();
-      statusEl.textContent = 'Your image is on the plate. Five bands loose.';
     };
     reader.readAsDataURL(file);
   });
 
-  scatter();
+  buildGallery();
+  selectEdition(0);
 })();
 </script>
 </body>
