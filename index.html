@@ -43,8 +43,9 @@
   }
 
   canvas#sky-base, canvas#sky-stars {
-    position: fixed;
-    inset: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
     z-index: -1;
     pointer-events: none;
   }
@@ -120,13 +121,6 @@
     text-transform: uppercase;
     color: var(--ink-faint);
     font-weight: 400;
-  }
-
-  .gallery-range {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: .06em;
-    color: var(--ink-faint);
   }
 
   .card-date {
@@ -413,7 +407,7 @@
   </header>
 
   <div>
-    <div class="gallery-head"><h2>Choose an edition</h2><span class="gallery-range">Fall 2025 &ndash; August 2026</span></div>
+    <div class="gallery-head"><h2>Choose an edition</h2></div>
     <div class="gallery" id="gallery"></div>
   </div>
 
@@ -496,9 +490,9 @@
   function drawBase() {
     const g = bctx.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, '#03040a');
-    g.addColorStop(0.4, '#0a1226');
-    g.addColorStop(0.72, '#182653');
-    g.addColorStop(1, '#33447f');
+    g.addColorStop(0.45, '#080f1f');
+    g.addColorStop(0.8, '#0b1428');
+    g.addColorStop(1, '#0e1730');
     bctx.fillStyle = g;
     bctx.fillRect(0, 0, w, h);
 
@@ -581,14 +575,30 @@
     shooting = shooting.filter(s => s.life > 0 && s.x < w + 100 && s.y < h + 100);
   }
 
+  function pageHeight() {
+    const sheet = document.querySelector('.sheet');
+    if (!sheet) return window.innerHeight;
+    const rect = sheet.getBoundingClientRect();
+    const style = getComputedStyle(sheet);
+    const marginBottom = parseFloat(style.marginBottom) || 0;
+    return Math.max(window.innerHeight, Math.ceil(rect.bottom + window.scrollY + marginBottom));
+  }
+
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = window.innerWidth; h = window.innerHeight;
+    w = window.innerWidth; h = pageHeight();
     sizeCanvas(base, bctx);
     sizeCanvas(starsCv, sctx);
     seedStars();
     drawBase();
     drawStars(0);
+  }
+
+  let resizePending = false;
+  function scheduleResize() {
+    if (resizePending) return;
+    resizePending = true;
+    requestAnimationFrame(() => { resizePending = false; resize(); });
   }
 
   function loop(t) {
@@ -598,7 +608,13 @@
     requestAnimationFrame(loop);
   }
 
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', scheduleResize);
+  window.addEventListener('orientationchange', scheduleResize);
+  window.addEventListener('load', scheduleResize);
+  if (window.ResizeObserver) {
+    const sheetEl = document.querySelector('.sheet');
+    if (sheetEl) new ResizeObserver(scheduleResize).observe(sheetEl);
+  }
   resize();
   if (!reduceMotion) requestAnimationFrame(loop);
 })();
