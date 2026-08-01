@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Rebuild the Cover — A Five-Piece Puzzle</title>
+<style>
+  :root {
+    --bg: #DCD9CF;
+    --plate: #F4F2EC;
+    --plate-edge: #C3BFB2;
+    --ink: #191C22;
+    --ink-soft: #5A5F68;
+    --ink-faint: #8B8F96;
+    --cyan: #0E7C93;
+    --magenta: #B22F62;
+    --rule: #C7C3B6;
+    --shadow: rgba(25, 28, 34, .22);
+    --focus: #0E7C93;
+
+    --display: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181D;
+      --plate: #21252D;
+      --plate-edge: #333944;
+      --ink: #E7E4DA;
+      --ink-soft: #A2A7B0;
+      --ink-faint: #6E747E;
+      --cyan: #3FBCD2;
+      --magenta: #E4699B;
+      --rule: #343A45;
+      --shadow: rgba(0, 0, 0, .55);
+      --focus: #3FBCD2;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #15181D;
+    --plate: #21252D;
+    --plate-edge: #333944;
+    --ink: #E7E4DA;
+    --ink-soft: #A2A7B0;
+    --ink-faint: #6E747E;
+    --cyan: #3FBCD2;
+    --magenta: #E4699B;
+    --rule: #343A45;
+    --shadow: rgba(0, 0, 0, .55);
+    --focus: #3FBCD2;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #DCD9CF;
+    --plate: #F4F2EC;
+    --plate-edge: #C3BFB2;
+    --ink: #191C22;
+    --ink-soft: #5A5F68;
+    --ink-faint: #8B8F96;
+    --cyan: #0E7C93;
+    --magenta: #B22F62;
+    --rule: #C7C3B6;
+    --shadow: rgba(25, 28, 34, .22);
+    --focus: #0E7C93;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 32px) 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* ---- masthead of the page itself ---- */
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 20px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--magenta);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(30px, 5.4vw, 46px);
+    letter-spacing: -.015em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  /* ---- toolbar ---- */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  button, .filebtn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+
+  button:hover, .filebtn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  button[aria-pressed="true"] {
+    border-color: var(--cyan);
+    background: color-mix(in srgb, var(--cyan) 14%, transparent);
+    color: var(--cyan);
+  }
+
+  button:focus-visible, .filebtn:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+  .readout {
+    margin-left: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-faint);
+  }
+
+  .readout b {
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  /* ---- the plate ---- */
+  .stage {
+    position: relative;
+    background: var(--plate);
+    border: 1px solid var(--plate-edge);
+    border-radius: 3px;
+    padding: 10px;
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+                0 18px 40px -28px var(--shadow);
+    touch-action: none;
+  }
+
+  .stage svg { display: block; width: 100%; height: auto; }
+
+  .piece { cursor: grab; }
+  .piece.dragging { cursor: grabbing; }
+  .piece.locked { cursor: default; }
+
+  .piece .shade {
+    filter: drop-shadow(0 3px 5px var(--shadow));
+    transition: filter .18s ease;
+  }
+  .piece.locked .shade { filter: none; }
+  .piece.dragging .shade { filter: drop-shadow(0 10px 14px var(--shadow)); }
+
+  .seam {
+    fill: none;
+    stroke: color-mix(in srgb, var(--ink) 35%, transparent);
+    stroke-width: 1;
+    transition: opacity .5s ease .25s;
+  }
+
+  .piece:focus { outline: none; }
+  .piece:focus-visible .seam {
+    stroke: var(--focus);
+    stroke-width: 2.2;
+  }
+
+  .board-outline {
+    fill: none;
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    opacity: .5;
+  }
+
+  .reg { stroke-width: 1; fill: none; }
+  .reg-c { stroke: var(--cyan); }
+  .reg-m { stroke: var(--magenta); }
+
+  .tray-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .18em;
+    fill: var(--ink-faint);
+  }
+
+  #ghost { opacity: 0; transition: opacity .25s ease; pointer-events: none; }
+  #ghost.on { opacity: .17; }
+
+  #pieces { transition: transform .6s cubic-bezier(.2, .8, .3, 1); }
+  .stage.done #pieces { transform: translateY(-4px); }
+  .stage.done .seam { opacity: 0; }
+
+  /* ---- status ---- */
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 22px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .status.win {
+    color: var(--ink);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 17px;
+  }
+
+  .status .tick {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    font-style: normal;
+  }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    max-width: 62ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Composing room &middot; Issue No.&nbsp;21</div>
+    <h1>Rebuild the Cover</h1>
+    <p class="lede">A newsstand cover, cut into five bands and scattered across the plate. Drag each band back into the dashed frame &mdash; it snaps home when it&rsquo;s close. Arrow keys nudge a selected piece; Enter drops it.</p>
+  </header>
+
+  <div class="toolbar">
+    <button id="shuffle" type="button">Scatter again</button>
+    <button id="peek" type="button" aria-pressed="false">Peek</button>
+    <label class="filebtn" for="upload">Load your own cover<input id="upload" type="file" accept="image/*"></label>
+    <div class="readout">
+      <span><b id="count">0</b>&thinsp;/&thinsp;5 placed</span>
+      <span id="clock">0:00</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <svg id="svg" viewBox="0 0 700 470" role="application" aria-label="Five-piece cover puzzle">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#7EA8B4"/>
+          <stop offset=".46" stop-color="#D9CBA6"/>
+          <stop offset="1" stop-color="#E9B978"/>
+        </linearGradient>
+        <clipPath id="coverClip"><rect x="0" y="0" width="260" height="360"/></clipPath>
+        <clipPath id="skyClip"><rect x="14" y="52" width="232" height="252"/></clipPath>
+
+        <!-- the cover artwork, drawn once, reused by every piece -->
+        <g id="art">
+          <rect width="260" height="360" fill="#F1EDE3"/>
+          <image id="userArt" x="0" y="0" width="260" height="360"
+                 preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <g id="drawnArt">
+            <g clip-path="url(#skyClip)">
+              <rect x="14" y="52" width="232" height="252" fill="url(#sky)"/>
+              <circle cx="172" cy="178" r="37" fill="#E9A33C"/>
+              <g id="skyline"></g>
+            </g>
+            <path d="M40 84 q5-5 10 0 q5-5 10 0" fill="none" stroke="#3A5563" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M66 72 q4-4 8 0 q4-4 8 0" fill="none" stroke="#3A5563" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M52 100 q3.5-3.5 7 0 q3.5-3.5 7 0" fill="none" stroke="#3A5563" stroke-width="1.1" stroke-linecap="round"/>
+
+            <text x="130" y="36" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
+                  font-size="27" letter-spacing="0.4" fill="#16202A">The Metropolitan</text>
+            <text x="16" y="20" font-family="ui-monospace, Consolas, monospace" font-size="6.5"
+                  letter-spacing="1.4" fill="#5E6A72">VOL. XCIX</text>
+            <text x="244" y="20" text-anchor="end" font-family="ui-monospace, Consolas, monospace" font-size="6.5"
+                  letter-spacing="1.4" fill="#5E6A72">NO. 21</text>
+            <line x1="14" y1="44" x2="246" y2="44" stroke="#16202A" stroke-width="0.8"/>
+
+            <line x1="14" y1="316" x2="246" y2="316" stroke="#16202A" stroke-width="0.8"/>
+            <text x="130" y="334" text-anchor="middle" font-family="ui-monospace, Consolas, monospace"
+                  font-size="8" letter-spacing="3.2" fill="#16202A">THE SKYLINE ISSUE</text>
+            <text x="130" y="348" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
+                  font-size="8.5" fill="#6B6357">August 1, 2026 &#183; eight dollars</text>
+            <rect x="8" y="8" width="244" height="344" fill="none" stroke="#16202A" stroke-width="0.7" opacity=".55"/>
+          </g>
+        </g>
+      </defs>
+
+      <!-- registration marks on the plate -->
+      <g class="reg reg-c" opacity=".7">
+        <path d="M18 18 h14 M25 11 v14"/><path d="M682 452 h-14 M675 459 v-14"/>
+      </g>
+      <g class="reg reg-m" opacity=".7">
+        <path d="M682 18 h-14 M675 11 v14"/><path d="M18 452 h14 M25 459 v-14"/>
+      </g>
+
+      <text class="tray-label" x="30" y="34">FRAME</text>
+      <text class="tray-label" x="352" y="34">LOOSE BANDS</text>
+
+      <rect class="board-outline" x="30" y="45" width="260" height="360" rx="1"/>
+      <g id="ghost" transform="translate(30 45)"><use href="#art"/></g>
+      <g id="pieces"></g>
+    </svg>
+  </div>
+
+  <p class="status" id="status">Five bands loose on the plate.</p>
+
+  <footer>
+    The cover art here was drawn for this page &mdash; it&rsquo;s an original illustration in the newsstand style, not a scan of a real magazine. Load your own image to puzzle it instead; the file stays in your browser and is never uploaded.
+  </footer>
+</div>
+
+<script>
+(function () {
+  const W = 260, H = 360, N = 5, BH = H / N;
+  const BX = 30, BY = 45;          // home position of every piece
+  const TX = 352, TY = 30, ROW = 78, SNAP = 24;
+
+  const svg = document.getElementById('svg');
+  const layer = document.getElementById('pieces');
+  const stage = document.getElementById('stage');
+  const statusEl = document.getElementById('status');
+  const countEl = document.getElementById('count');
+  const clockEl = document.getElementById('clock');
+
+  /* ---------- skyline: deterministic buildings + lit windows ---------- */
+  const towers = [
+    { x: 14,  w: 30, h: 96,  f: '#2C5468' },
+    { x: 44,  w: 22, h: 140, f: '#1B3C4C' },
+    { x: 66,  w: 34, h: 72,  f: '#35667C' },
+    { x: 100, w: 26, h: 176, f: '#12303E' },
+    { x: 126, w: 30, h: 110, f: '#244B5E' },
+    { x: 156, w: 20, h: 150, f: '#1B3C4C' },
+    { x: 176, w: 40, h: 88,  f: '#2C5468' },
+    { x: 216, w: 30, h: 124, f: '#16333F' }
+  ];
+  const GROUND = 304, SVGNS = 'http://www.w3.org/2000/svg';
+  const sky = document.getElementById('skyline');
+
+  function el(name, attrs) {
+    const n = document.createElementNS(SVGNS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  towers.forEach((t, i) => {
+    const top = GROUND - t.h;
+    sky.appendChild(el('rect', { x: t.x, y: top, width: t.w, height: t.h, fill: t.f }));
+    if (i === 3) {                                   // setback + spire on the tallest
+      sky.appendChild(el('rect', { x: t.x + 8, y: top - 16, width: t.w - 16, height: 16, fill: t.f }));
+      sky.appendChild(el('rect', { x: t.x + t.w / 2 - 1, y: top - 34, width: 2, height: 18, fill: t.f }));
+    }
+    if (i === 6) {                                   // rooftop water tower
+      sky.appendChild(el('rect', { x: t.x + 12, y: top - 13, width: 14, height: 11, fill: '#0E2833' }));
+      sky.appendChild(el('path', { d: `M${t.x + 11} ${top - 13} l7 -7 l7 7 z`, fill: '#0E2833' }));
+      sky.appendChild(el('rect', { x: t.x + 14, y: top - 2, width: 2, height: 3, fill: '#0E2833' }));
+      sky.appendChild(el('rect', { x: t.x + 22, y: top - 2, width: 2, height: 3, fill: '#0E2833' }));
+    }
+    const cols = Math.floor((t.w - 6) / 8), rows = Math.floor((t.h - 10) / 11);
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        if ((i * 7 + c * 13 + r * 5) % 4 === 0) continue;   // some windows dark
+        const warm = (i * 3 + c * 5 + r * 11) % 3 === 0;
+        sky.appendChild(el('rect', {
+          x: t.x + 4 + c * 8, y: top + 7 + r * 11, width: 3.4, height: 4.6,
+          fill: warm ? '#F6CE85' : '#9FBAC4', opacity: warm ? .95 : .5
+        }));
+      }
+    }
+  });
+
+  /* ---------- piece geometry ---------- */
+  const knobX = [118, 146, 112, 152];        // where each seam's tab sits
+  const knobDir = [1, -1, 1, -1];            // which way it bulges
+  const R = 13;
+
+  function edge(y, cx, d, leftToRight) {
+    const k = d * 22;
+    return leftToRight
+      ? `L ${cx - R} ${y} C ${cx - R} ${y + k} ${cx + R} ${y + k} ${cx + R} ${y} L ${W} ${y}`
+      : `L ${cx + R} ${y} C ${cx + R} ${y + k} ${cx - R} ${y + k} ${cx - R} ${y} L 0 ${y}`;
+  }
+
+  function pathFor(i) {
+    const top = i * BH, bot = (i + 1) * BH;
+    let d = `M 0 ${top} `;
+    d += i > 0 ? edge(top, knobX[i - 1], knobDir[i - 1], true) : `L ${W} ${top}`;
+    d += ` L ${W} ${bot} `;
+    d += i < N - 1 ? edge(bot, knobX[i], knobDir[i], false) : `L 0 ${bot}`;
+    return d + ' Z';
+  }
+
+  /* ---------- build pieces ---------- */
+  const defs = svg.querySelector('defs');
+  const pieces = [];
+
+  for (let i = 0; i < N; i++) {
+    const clip = el('clipPath', { id: 'clip' + i });
+    clip.appendChild(el('path', { d: pathFor(i) }));
+    defs.appendChild(clip);
+
+    const g = el('g', { class: 'piece', tabindex: '0', role: 'button' });
+    g.setAttribute('aria-label', `Band ${i + 1} of 5`);
+
+    const shade = el('g', { class: 'shade' });
+    const clipped = el('g', { 'clip-path': `url(#clip${i})` });
+    clipped.appendChild(el('use', { href: '#art' }));
+    shade.appendChild(clipped);
+    shade.appendChild(el('path', { class: 'seam', d: pathFor(i) }));
+    g.appendChild(shade);
+
+    layer.appendChild(g);
+    pieces.push({ i, g, tx: 0, ty: 0, locked: false });
+  }
+
+  const place = p => p.g.setAttribute('transform', `translate(${p.tx} ${p.ty})`);
+
+  /* ---------- state ---------- */
+  let started = 0, timer = null, solved = 0;
+
+  function scatter() {
+    const slots = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5);
+    pieces.forEach((p, n) => {
+      p.locked = false;
+      p.g.classList.remove('locked');
+      p.tx = TX + (n % 2 ? 16 : 0) + (slots[n] % 3) * 5;
+      p.ty = TY + slots[n] * ROW - p.i * BH;
+      place(p);
+      layer.appendChild(p.g);
+    });
+    solved = 0;
+    stage.classList.remove('done');
+    countEl.textContent = '0';
+    statusEl.className = 'status';
+    statusEl.textContent = 'Five bands loose on the plate.';
+    clearInterval(timer); timer = null; started = 0;
+    clockEl.textContent = '0:00';
+  }
+
+  function startClock() {
+    if (started) return;
+    started = Date.now();
+    timer = setInterval(() => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      clockEl.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }, 500);
+  }
+
+  function tryLock(p) {
+    if (Math.hypot(p.tx - BX, p.ty - BY) > SNAP) return false;
+    p.tx = BX; p.ty = BY; p.locked = true;
+    p.g.classList.add('locked');
+    place(p);
+    layer.insertBefore(p.g, layer.firstChild);
+    solved++;
+    countEl.textContent = String(solved);
+    if (solved === N) {
+      clearInterval(timer);
+      stage.classList.add('done');
+      statusEl.className = 'status win';
+      statusEl.innerHTML = `<span class="tick">Locked up</span> The cover is whole again &mdash; ${clockEl.textContent} on the clock.`;
+    } else {
+      statusEl.className = 'status';
+      statusEl.textContent = `${N - solved} band${N - solved === 1 ? '' : 's'} still loose.`;
+    }
+    return true;
+  }
+
+  /* ---------- pointer dragging ---------- */
+  const pt = svg.createSVGPoint();
+  function toSvg(e) {
+    pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  pieces.forEach(p => {
+    let start = null, origin = null;
+
+    p.g.addEventListener('pointerdown', e => {
+      if (p.locked) return;
+      startClock();
+      start = toSvg(e);
+      origin = { x: p.tx, y: p.ty };
+      p.g.setPointerCapture(e.pointerId);
+      p.g.classList.add('dragging');
+      layer.appendChild(p.g);
+      e.preventDefault();
+    });
+
+    p.g.addEventListener('pointermove', e => {
+      if (!start) return;
+      const m = toSvg(e);
+      p.tx = origin.x + (m.x - start.x);
+      p.ty = origin.y + (m.y - start.y);
+      place(p);
+    });
+
+    const end = e => {
+      if (!start) return;
+      start = null;
+      p.g.classList.remove('dragging');
+      try { p.g.releasePointerCapture(e.pointerId); } catch (_) {}
+      tryLock(p);
+    };
+    p.g.addEventListener('pointerup', end);
+    p.g.addEventListener('pointercancel', end);
+
+    p.g.addEventListener('keydown', e => {
+      if (p.locked) return;
+      const step = e.shiftKey ? 20 : 6;
+      const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+      if (moves[e.key]) {
+        startClock();
+        p.tx += moves[e.key][0];
+        p.ty += moves[e.key][1];
+        place(p);
+        e.preventDefault();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        startClock();
+        if (!tryLock(p)) {
+          statusEl.className = 'status';
+          statusEl.textContent = 'Not close enough to the frame yet — keep nudging.';
+        }
+        e.preventDefault();
+      }
+    });
+  });
+
+  /* ---------- controls ---------- */
+  document.getElementById('shuffle').addEventListener('click', scatter);
+
+  const peek = document.getElementById('peek');
+  const ghost = document.getElementById('ghost');
+  peek.addEventListener('click', () => {
+    const on = peek.getAttribute('aria-pressed') === 'true';
+    peek.setAttribute('aria-pressed', String(!on));
+    ghost.classList.toggle('on', !on);
+  });
+
+  document.getElementById('upload').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = document.getElementById('userArt');
+      img.setAttribute('href', reader.result);
+      img.style.display = '';
+      document.getElementById('drawnArt').style.display = 'none';
+      scatter();
+      statusEl.textContent = 'Your image is on the plate. Five bands loose.';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  scatter();
+})();
+</script>
+</body>
+</html>
