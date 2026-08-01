@@ -81,15 +81,10 @@
     color: var(--brass-deep);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
-  .eyebrow::before {
-    content: "";
-    width: 22px;
-    height: 1px;
-    background: var(--indigo);
-  }
+  .eyebrow .spark { color: var(--indigo); flex: none; }
 
   h1 {
     margin: 0;
@@ -125,6 +120,20 @@
     text-transform: uppercase;
     color: var(--ink-faint);
     font-weight: 400;
+  }
+
+  .gallery-range {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--ink-faint);
+  }
+
+  .card-date {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .06em;
+    color: var(--ink-faint);
   }
 
   .gallery {
@@ -246,7 +255,7 @@
     gap: 10px;
   }
 
-  button, .filebtn {
+  button {
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: .12em;
@@ -260,7 +269,7 @@
     transition: border-color .15s, color .15s, background .15s;
   }
 
-  button:hover, .filebtn:hover {
+  button:hover {
     border-color: var(--brass-deep);
     color: var(--brass-deep);
   }
@@ -271,12 +280,10 @@
     color: var(--brass-deep);
   }
 
-  button:focus-visible, .filebtn:focus-within {
+  button:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
-
-  .filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 
   .readout {
     margin-left: auto;
@@ -397,25 +404,27 @@
 
 <div class="sheet">
   <header>
-    <div class="eyebrow">Composing room &middot; after hours</div>
+    <div class="eyebrow">
+      <svg class="spark" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="2" cy="10.5" r="1" fill="currentColor"/><circle cx="7.2" cy="3.6" r="1.3" fill="currentColor"/><circle cx="12.4" cy="7.8" r="1" fill="currentColor"/><path d="M2 10.5 L7.2 3.6 L12.4 7.8" stroke="currentColor" stroke-width="0.6" fill="none" opacity=".6"/></svg>
+      Composing room &middot; after hours
+    </div>
     <h1>Rebuild the Cover</h1>
     <p class="lede">Five original cover illustrations, each in the spirit of a classic newsstand magazine and each cut into five interlocking bands. Pick an edition below, then drag its bands back into the dashed frame &mdash; a piece snaps home when it&rsquo;s close. Arrow keys nudge a selected piece; Enter drops it.</p>
   </header>
 
   <div>
-    <div class="gallery-head"><h2>Choose an edition</h2></div>
+    <div class="gallery-head"><h2>Choose an edition</h2><span class="gallery-range">Fall 2025 &ndash; August 2026</span></div>
     <div class="gallery" id="gallery"></div>
   </div>
 
   <div class="now" aria-live="polite">
-    <p class="now-kicker" id="nowKicker">Rebuild the Cover &mdash; The Metropolitan, Edition No. 21</p>
+    <p class="now-kicker" id="nowKicker">Edition No. 25 &middot; August 2026</p>
     <p class="now-blurb" id="nowBlurb">The Skyline Issue &mdash; dusk settles over the avenue as the lights come up, one window at a time.</p>
   </div>
 
   <div class="toolbar">
     <button id="shuffle" type="button">Scatter again</button>
     <button id="peek" type="button" aria-pressed="false">Peek</button>
-    <label class="filebtn" for="upload">Load your own cover<input id="upload" type="file" accept="image/*"></label>
     <div class="readout">
       <span><b id="count">0</b>&thinsp;/&thinsp;5 placed</span>
       <span id="clock">0:00</span>
@@ -428,8 +437,6 @@
         <g id="dynDefs"></g>
         <g id="art">
           <rect width="260" height="360" fill="#F1EDE3"/>
-          <image id="userArt" x="0" y="0" width="260" height="360"
-                 preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <g id="drawnArt"></g>
         </g>
       </defs>
@@ -453,7 +460,7 @@
   <p class="status" id="status">Five bands loose on the plate.</p>
 
   <footer>
-    Each cover here is an original illustration drawn for this page in the spirit of classic New Yorker&ndash;style newsstand art &mdash; none are scans or reproductions of real covers. Load your own image from the toolbar above to puzzle it instead; the file stays in your browser and is never uploaded.
+    Every cover shown here is an original illustration created for this page, drawn in the visual spirit of classic newsstand magazine art. None are scans, traces, or reproductions of any real cover &mdash; and this page has no affiliation with, endorsement from, or connection to The New Yorker, Cond&eacute;&nbsp;Nast, or any other publication.
   </footer>
 </div>
 
@@ -465,7 +472,7 @@
   const bctx = base.getContext('2d');
   const sctx = starsCv.getContext('2d');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let stars = [], w = 0, h = 0, dpr = 1;
+  let stars = [], shooting = [], w = 0, h = 0, dpr = 1;
 
   function sizeCanvas(cv, ctx) {
     cv.width = w * dpr; cv.height = h * dpr;
@@ -474,37 +481,55 @@
   }
 
   function seedStars() {
-    const count = Math.max(70, Math.round((w * h) / 4200));
+    const count = Math.max(140, Math.round((w * h) / 2100));
+    const palette = ['#f5f3ff', '#eef2ff', '#fff4dd', '#e8f4ff'];
     stars = Array.from({ length: count }, () => ({
       x: Math.random() * w,
-      y: Math.random() * h * 0.88,
-      r: Math.random() * 1.2 + 0.3,
+      y: Math.random() * h * 0.9,
+      r: Math.random() * Math.random() * 1.8 + 0.3,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.4 + Math.random() * 0.8
+      speed: 0.3 + Math.random() * 0.9,
+      color: palette[Math.floor(Math.random() * palette.length)]
     }));
   }
 
   function drawBase() {
     const g = bctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#04060d');
-    g.addColorStop(0.55, '#101a34');
-    g.addColorStop(1, '#2b3766');
+    g.addColorStop(0, '#03040a');
+    g.addColorStop(0.4, '#0a1226');
+    g.addColorStop(0.72, '#182653');
+    g.addColorStop(1, '#33447f');
     bctx.fillStyle = g;
     bctx.fillRect(0, 0, w, h);
 
-    const mx = w * 0.84, my = h * 0.15, mr = Math.min(w, h) * 0.05;
-    const glow = bctx.createRadialGradient(mx, my, 0, mx, my, mr * 5);
-    glow.addColorStop(0, 'rgba(246,236,214,0.32)');
+    const neb1 = bctx.createRadialGradient(w * 0.22, h * 0.28, 0, w * 0.22, h * 0.28, Math.max(w, h) * 0.55);
+    neb1.addColorStop(0, 'rgba(98,78,150,0.22)');
+    neb1.addColorStop(1, 'rgba(98,78,150,0)');
+    bctx.fillStyle = neb1;
+    bctx.fillRect(0, 0, w, h);
+
+    const neb2 = bctx.createRadialGradient(w * 0.72, h * 0.5, 0, w * 0.72, h * 0.5, Math.max(w, h) * 0.5);
+    neb2.addColorStop(0, 'rgba(38,92,112,0.18)');
+    neb2.addColorStop(1, 'rgba(38,92,112,0)');
+    bctx.fillStyle = neb2;
+    bctx.fillRect(0, 0, w, h);
+
+    const mx = w * 0.84, my = h * 0.15, mr = Math.min(w, h) * 0.052;
+    const glow = bctx.createRadialGradient(mx, my, 0, mx, my, mr * 7);
+    glow.addColorStop(0, 'rgba(246,236,214,0.4)');
+    glow.addColorStop(0.4, 'rgba(246,236,214,0.12)');
     glow.addColorStop(1, 'rgba(246,236,214,0)');
     bctx.fillStyle = glow;
-    bctx.beginPath(); bctx.arc(mx, my, mr * 5, 0, Math.PI * 2); bctx.fill();
-    bctx.fillStyle = '#f6ecd6';
+    bctx.beginPath(); bctx.arc(mx, my, mr * 7, 0, Math.PI * 2); bctx.fill();
+    bctx.fillStyle = '#f8efdc';
     bctx.beginPath(); bctx.arc(mx, my, mr, 0, Math.PI * 2); bctx.fill();
+    bctx.fillStyle = 'rgba(208,194,166,0.55)';
+    bctx.beginPath(); bctx.arc(mx - mr * 0.32, my - mr * 0.1, mr * 0.85, 0, Math.PI * 2); bctx.fill();
 
     let seed = 42;
     const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
-    bctx.fillStyle = 'rgba(4,6,13,0.92)';
-    const baseY = h * 0.92;
+    bctx.fillStyle = 'rgba(3,4,9,0.94)';
+    const baseY = h * 0.93;
     let x = -20;
     while (x < w + 20) {
       const bw = 24 + rnd() * 44;
@@ -517,14 +542,43 @@
   function drawStars(t) {
     sctx.clearRect(0, 0, w, h);
     stars.forEach(s => {
-      const tw = reduceMotion ? 0.85 : 0.5 + 0.5 * Math.sin(t * 0.0009 * s.speed + s.phase);
+      const tw = reduceMotion ? 0.8 : 0.45 + 0.55 * Math.sin(t * 0.0009 * s.speed + s.phase);
       sctx.globalAlpha = tw;
-      sctx.fillStyle = '#eef2ff';
+      sctx.fillStyle = s.color;
       sctx.beginPath();
       sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       sctx.fill();
     });
     sctx.globalAlpha = 1;
+  }
+
+  function spawnShootingStar() {
+    shooting.push({
+      x: Math.random() * w * 0.55,
+      y: Math.random() * h * 0.32,
+      dx: 5 + Math.random() * 3,
+      dy: 2 + Math.random() * 1.4,
+      len: 70 + Math.random() * 50,
+      life: 1
+    });
+  }
+
+  function drawShootingStars() {
+    shooting.forEach(s => {
+      const tailX = s.x - s.dx * (s.len / 6);
+      const tailY = s.y - s.dy * (s.len / 6);
+      const grad = sctx.createLinearGradient(tailX, tailY, s.x, s.y);
+      grad.addColorStop(0, 'rgba(255,255,255,0)');
+      grad.addColorStop(1, `rgba(255,255,255,${s.life})`);
+      sctx.strokeStyle = grad;
+      sctx.lineWidth = 1.5;
+      sctx.beginPath();
+      sctx.moveTo(tailX, tailY);
+      sctx.lineTo(s.x, s.y);
+      sctx.stroke();
+      s.x += s.dx; s.y += s.dy; s.life -= 0.02;
+    });
+    shooting = shooting.filter(s => s.life > 0 && s.x < w + 100 && s.y < h + 100);
   }
 
   function resize() {
@@ -539,6 +593,8 @@
 
   function loop(t) {
     drawStars(t);
+    if (Math.random() < 0.004 && shooting.length < 2) spawnShootingStar();
+    drawShootingStars();
     requestAnimationFrame(loop);
   }
 
@@ -560,7 +616,7 @@ function text(str, attrs) {
   return t;
 }
 
-const SX = 14, SY = 52, SW = 232, SH = 252;
+const SX = 14, SY = 40, SW = 232, SH = 264;
 
 function skyGradient(defs, ns, stops) {
   const grad = el('linearGradient', { id: ns + '-sky', x1: 0, y1: 0, x2: 0, y2: 1 });
@@ -576,13 +632,11 @@ function clipRect(defs, ns, name, attrs) {
 }
 
 function drawFrame(g, info) {
-  g.appendChild(text('The Metropolitan', { x: 130, y: 36, 'text-anchor': 'middle', 'font-family': 'Georgia, serif', 'font-style': 'italic', 'font-size': 26, 'letter-spacing': '0.4', fill: '#16202A' }));
-  g.appendChild(text('VOL. XCIX', { x: 16, y: 20, 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 6.5, 'letter-spacing': '1.4', fill: '#5E6A72' }));
-  g.appendChild(text('NO. ' + info.no, { x: 244, y: 20, 'text-anchor': 'end', 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 6.5, 'letter-spacing': '1.4', fill: '#5E6A72' }));
-  g.appendChild(el('line', { x1: 14, y1: 44, x2: 246, y2: 44, stroke: '#16202A', 'stroke-width': 0.8 }));
+  g.appendChild(text('NO. ' + info.no, { x: 130, y: 24, 'text-anchor': 'middle', 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 7, 'letter-spacing': '3', fill: '#5E6A72' }));
+  g.appendChild(el('line', { x1: 14, y1: 32, x2: 246, y2: 32, stroke: '#16202A', 'stroke-width': 0.8, opacity: .55 }));
   g.appendChild(el('line', { x1: 14, y1: 316, x2: 246, y2: 316, stroke: '#16202A', 'stroke-width': 0.8 }));
   g.appendChild(text(info.title.toUpperCase(), { x: 130, y: 334, 'text-anchor': 'middle', 'font-family': 'ui-monospace, Consolas, monospace', 'font-size': 7.4, 'letter-spacing': '2.4', fill: '#16202A' }));
-  g.appendChild(text(info.dateStr, { x: 130, y: 348, 'text-anchor': 'middle', 'font-family': 'Georgia, serif', 'font-style': 'italic', 'font-size': 8.5, fill: '#6B6357' }));
+  g.appendChild(text(info.dateLong, { x: 130, y: 348, 'text-anchor': 'middle', 'font-family': 'Georgia, serif', 'font-style': 'italic', 'font-size': 8.5, fill: '#6B6357' }));
   g.appendChild(el('rect', { x: 8, y: 8, width: 244, height: 344, fill: 'none', stroke: '#16202A', 'stroke-width': 0.7, opacity: .55 }));
 }
 
@@ -728,11 +782,11 @@ function drawBloom(g, defs, ns) {
 }
 
 const EDITIONS = [
-  { id: 'skyline', no: 21, title: 'The Skyline Issue', dateStr: 'August 1, 2026 · eight dollars', blurb: 'Dusk settles over the avenue as the lights come up, one window at a time.', draw: drawSkyline },
-  { id: 'harvest', no: 22, title: 'The Harvest Issue', dateStr: 'October 12, 2026 · eight dollars', blurb: 'Amber leaves drift across the promenade on the first cold morning.', draw: drawHarvest },
-  { id: 'snow', no: 23, title: 'The Snow Issue', dateStr: 'December 21, 2026 · eight dollars', blurb: 'The city exhales steam into a hushed, snow-quiet morning.', draw: drawSnow },
-  { id: 'rain', no: 24, title: 'The Rain Issue', dateStr: 'April 5, 2027 · eight dollars', blurb: 'Umbrellas bloom along the crosswalk as the avenue turns to reflection.', draw: drawRain },
-  { id: 'bloom', no: 25, title: 'The Bloom Issue', dateStr: 'May 24, 2027 · eight dollars', blurb: 'Blossoms crowd the fire escape as the rooftop garden wakes up.', draw: drawBloom }
+  { id: 'skyline', no: 25, title: 'The Skyline Issue', dateShort: 'August 2026', dateLong: 'August 2026 · eight dollars', blurb: 'Dusk settles over the avenue as the lights come up, one window at a time.', draw: drawSkyline },
+  { id: 'bloom', no: 24, title: 'The Bloom Issue', dateShort: 'May 2026', dateLong: 'May 2026 · eight dollars', blurb: 'Blossoms crowd the fire escape as the rooftop garden wakes up.', draw: drawBloom },
+  { id: 'rain', no: 23, title: 'The Rain Issue', dateShort: 'April 2026', dateLong: 'April 2026 · eight dollars', blurb: 'Umbrellas bloom along the crosswalk as the avenue turns to reflection.', draw: drawRain },
+  { id: 'snow', no: 22, title: 'The Snow Issue', dateShort: 'December 2025', dateLong: 'December 2025 · eight dollars', blurb: 'The city exhales steam into a hushed, snow-quiet morning.', draw: drawSnow },
+  { id: 'harvest', no: 21, title: 'The Harvest Issue', dateShort: 'October 2025', dateLong: 'October 2025 · eight dollars', blurb: 'Amber leaves drift across the promenade on the first cold morning.', draw: drawHarvest }
 ];
 
 /* ================= puzzle mechanics ================= */
@@ -749,7 +803,6 @@ const EDITIONS = [
   const clockEl = document.getElementById('clock');
   const drawnArt = document.getElementById('drawnArt');
   const dynDefs = document.getElementById('dynDefs');
-  const userArt = document.getElementById('userArt');
 
   function buildArt(edition) {
     while (dynDefs.firstChild) dynDefs.removeChild(dynDefs.firstChild);
@@ -781,10 +834,8 @@ const EDITIONS = [
     currentIdx = i;
     const edition = EDITIONS[i];
     document.querySelectorAll('.card').forEach((c, ci) => c.setAttribute('aria-pressed', String(ci === i)));
-    userArt.style.display = 'none';
-    drawnArt.style.display = '';
     buildArt(edition);
-    document.getElementById('nowKicker').textContent = `Rebuild the Cover — The Metropolitan, Edition No. ${edition.no}`;
+    document.getElementById('nowKicker').textContent = `Edition No. ${edition.no} · ${edition.dateShort}`;
     document.getElementById('nowBlurb').textContent = `${edition.title} — ${edition.blurb}`;
     scatter();
   }
@@ -807,8 +858,12 @@ const EDITIONS = [
       const title = document.createElement('span');
       title.className = 'card-title';
       title.textContent = edition.title;
+      const date = document.createElement('span');
+      date.className = 'card-date';
+      date.textContent = edition.dateShort;
       meta.appendChild(no);
       meta.appendChild(title);
+      meta.appendChild(date);
       card.appendChild(thumbWrap);
       card.appendChild(meta);
       card.addEventListener('click', () => selectEdition(i));
@@ -978,23 +1033,6 @@ const EDITIONS = [
     const on = peek.getAttribute('aria-pressed') === 'true';
     peek.setAttribute('aria-pressed', String(!on));
     ghost.classList.toggle('on', !on);
-  });
-
-  document.getElementById('upload').addEventListener('change', e => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      userArt.setAttribute('href', reader.result);
-      userArt.style.display = '';
-      drawnArt.style.display = 'none';
-      document.querySelectorAll('.card').forEach(c => c.setAttribute('aria-pressed', 'false'));
-      currentIdx = -1;
-      document.getElementById('nowKicker').textContent = 'Rebuild the Cover — a cover of your own';
-      document.getElementById('nowBlurb').textContent = 'Loaded from your device — never uploaded anywhere.';
-      scatter();
-    };
-    reader.readAsDataURL(file);
   });
 
   buildGallery();
